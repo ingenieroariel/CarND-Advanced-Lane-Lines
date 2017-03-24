@@ -60,57 +60,65 @@ I then used the output `objpoints` and `imgpoints` to compute the camera calibra
 
 ####1. Provide an example of a distortion-corrected image.
 To demonstrate this step, I will describe how I apply the distortion correction to one of the test images like this one:
+Here is an example of the road image corrected for distortion using cv2.undistort:
+
+```
+    undist = cv2.undistort(img, mtx, dist, None, mtx)
+```
+
 ![alt text][image2]
+
 ####2. Describe how (and identify where in your code) you used color transforms, gradients or other methods to create a thresholded binary image.  Provide an example of a binary image result.
-I used a combination of color and gradient thresholds to generate a binary image (thresholding steps at lines # through # in `another_file.py`).  Here's an example of my output for this step.  (note: this is not actually from one of the test images)
+
+Near cell #4 in a section called `Thresholding` the code using vertical and horizontal gradients as well as color transformations can be found. No magnitude or angle gradient was used.:
+
+```
+    gradx = abs_sobel_thresh(img, orient='x', sobel_kernel=ksize, thresh=(20, 190))
+    grady = abs_sobel_thresh(img, orient='y', sobel_kernel=ksize, thresh=(30, 190))
+    s_binary = filter_s_select(img, thresh=(150, 255))
+    l_binary = filter_l_select(img, thresh=(190, 250))
+    
+    combined = np.zeros_like(s_binary)
+    combined[((gradx == 1) & (grady == 1)) | (s_binary == 1) | (l_binary == 1)] = 1
+    combined_gray = np.uint8(255*combined)
+```
+
+
+
 
 ![alt text][image3]
 
 ####3. Describe how (and identify where in your code) you performed a perspective transform and provide an example of a transformed image.
 
-The code for my perspective transform includes a function called `warper()`, which appears in lines 1 through 8 in the file `example.py` (output_images/examples/example.py) (or, for example, in the 3rd code cell of the IPython notebook).  The `warper()` function takes as inputs an image (`img`), as well as source (`src`) and destination (`dst`) points.  I chose the hardcode the source and destination points in the following manner:
+The warping code can be found near cell 5, in a section called `Perspective transformation`:
 
 ```
-src = np.float32(
-    [[(img_size[0] / 2) - 55, img_size[1] / 2 + 100],
-    [((img_size[0] / 6) - 10), img_size[1]],
-    [(img_size[0] * 5 / 6) + 60, img_size[1]],
-    [(img_size[0] / 2 + 55), img_size[1] / 2 + 100]])
-dst = np.float32(
-    [[(img_size[0] / 4), 0],
-    [(img_size[0] / 4), img_size[1]],
-    [(img_size[0] * 3 / 4), img_size[1]],
-    [(img_size[0] * 3 / 4), 0]])
-
+    # Warp the blank back to original image space using inverse perspective matrix (Minv)
+    newwarp = cv2.warpPerspective(lane, minv, (img.shape[1], img.shape[0])) 
+    # Combine the result with the original image
+    result = cv2.addWeighted(img, 1, newwarp, 0.4, 0)
 ```
-This resulted in the following source and destination points:
 
-| Source        | Destination   | 
-|:-------------:|:-------------:| 
-| 585, 460      | 320, 0        | 
-| 203, 720      | 320, 720      |
-| 1127, 720     | 960, 720      |
-| 695, 460      | 960, 0        |
-
-I verified that my perspective transform was working as expected by drawing the `src` and `dst` points onto a test image and its warped counterpart to verify that the lines appear parallel in the warped image.
-
-![alt text][image4]
+![alt text][image6]
 
 ####4. Describe how (and identify where in your code) you identified lane-line pixels and fit their positions with a polynomial?
 
-Then I did some other stuff and fit my lane lines with a 2nd order polynomial kinda like this:
+The XY polinomial fit was taken almost verbatim from the udacity course work. It uses a sliding window over the image to separate out good and bad left and right lanes.
 
-![alt text][image5]
+Tne np.polyfit was used to obtain a second order polynomial.
+
+The section near cell #6 is called `Extrapolate lines and draw them on the screen`
+![alt text][image7]
 
 ####5. Describe how (and identify where in your code) you calculated the radius of curvature of the lane and the position of the vehicle with respect to center.
 
-I did this in lines # through # in my code in `my_other_file.py`
+
 
 ####6. Provide an example image of your result plotted back down onto the road such that the lane area is identified clearly.
 
-I implemented this step in lines # through # in my code in `yet_another_file.py` in the function `map_lane()`.  Here is an example of my result on a test image:
 
-![alt text][image6]
+
+![alt text][image8]
 
 ---
 
@@ -118,7 +126,11 @@ I implemented this step in lines # through # in my code in `yet_another_file.py`
 
 ####1. Provide a link to your final video output.  Your pipeline should perform reasonably well on the entire project video (wobbly lines are ok but no catastrophic failures that would cause the car to drive off the road!).
 
-Here's a [link to my video result](./project_video.mp4)
+Here is a sample image showing the full pipeline:
+
+![][image9]
+
+Here's a [link to my video result](./result.mp4)
 
 ---
 
