@@ -18,13 +18,16 @@ The goals / steps of this project are the following:
 
 [//]: # (Image References)
 
-[image1]: ./examples/undistort_output.png "Undistorted"
-[image2]: ./test_images/test1.jpg "Road Transformed"
-[image3]: ./examples/binary_combo_example.jpg "Binary Example"
-[image4]: ./examples/warped_straight_lines.jpg "Warp Example"
-[image5]: ./examples/color_fit_lines.jpg "Fit Visual"
-[image6]: ./examples/example_output.jpg "Output"
-[video1]: ./project_video.mp4 "Video"
+[image1]: ./camera_cal/calibration15.jpg "Distorted"
+[image2]: ./undistort.jpg "Undistorted"
+[image3]: ./road-undistorted.png "Road Transformed"
+[image4]: ./road-binary.png "Binary Example"
+[image5]: ./road-region.png "Region of interest"
+[image6]: ./road-perspective.png "Road perspective"
+[image7]: ./road-polifit.png "Fitted curves"
+[image8]: ./road-output.png "Output"
+[image9]: ./road-process.png "Complete process"
+[video1]: ./result.mp4 "Video"
 
 ## [Rubric](https://review.udacity.com/#!/rubrics/571/view) Points
 ###Here I will consider the rubric points individually and describe how I addressed each point in my implementation.  
@@ -35,13 +38,19 @@ The goals / steps of this project are the following:
 ####1. Provide a Writeup / README that includes all the rubric points and how you addressed each one.  You can submit your writeup as markdown or pdf.  [Here](https://github.com/udacity/CarND-Advanced-Lane-Lines/blob/master/writeup_template.md) is a template writeup for this project you can use as a guide and a starting point.  
 
 You're reading it!
+
 ###Camera Calibration
 
 ####1. Briefly state how you computed the camera matrix and distortion coefficients. Provide an example of a distortion corrected calibration image.
 
-The code for this step is contained in the first code cell of the IPython notebook located in "./examples/example.ipynb" (or in lines # through # of the file called `some_file.py`).  
+Camera matrix and coeficients were calculated using cv2.calibrateCamera(), I used findChessboardCorners and drawChessboardCorners instead of doing it manually like in the course work. Once I got the `mtx` and `dist` values I just hardcoded them on my ipython notebook.
 
-I start by preparing "object points", which will be the (x, y, z) coordinates of the chessboard corners in the world. Here I am assuming the chessboard is fixed on the (x, y) plane at z=0, such that the object points are the same for each calibration image.  Thus, `objp` is just a replicated array of coordinates, and `objpoints` will be appended with a copy of it every time I successfully detect all chessboard corners in a test image.  `imgpoints` will be appended with the (x, y) pixel position of each of the corners in the image plane with each successful chessboard detection.  
+```
+MTX = np.array([[  1.15662906e+03,   0.00000000e+00,   6.69041437e+02],
+ [  0.00000000e+00,   1.15169194e+03,   3.88137240e+02],
+  [  0.00000000e+00,   0.00000000e+00,   1.00000000e+00]])
+DIST = np.array([[-0.2315715,  -0.12000537, -0.00118338,  0.00023305,  0.15641571]])
+```
 
 I then used the output `objpoints` and `imgpoints` to compute the camera calibration and distortion coefficients using the `cv2.calibrateCamera()` function.  I applied this distortion correction to the test image using the `cv2.undistort()` function and obtained this result: 
 
