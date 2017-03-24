@@ -112,11 +112,31 @@ The section near cell #6 is called `Extrapolate lines and draw them on the scree
 
 ####5. Describe how (and identify where in your code) you calculated the radius of curvature of the lane and the position of the vehicle with respect to center.
 
+The way to calculate the curvature radius and the vehicle position is to calculate a new x / y curve based on meters instead of pixels and with that get a radius using a formula based on the derivative of the curve. With the lane positions it is possible to average them and use that to calculate the position of the road based on the road width (average equaling zero means the car is centered).
 
+```
+    # Fit new polynomials to x,y in world space
+    left_fit_cr = np.polyfit(ploty*ym_per_pix, left_fitx*xm_per_pix, 2)
+    right_fit_cr = np.polyfit(ploty*ym_per_pix, right_fitx*xm_per_pix, 2)
+    left_curverad = ((1 + (2*left_fit_cr[0]*y_eval*ym_per_pix + left_fit_cr[1])**2)**1.5) / np.absolute(2*left_fit_cr[0])
+    right_curverad = ((1 + (2*right_fit_cr[0]*y_eval*ym_per_pix + right_fit_cr[1])**2)**1.5) / np.absolute(2*right_fit_cr[0])
+
+    cv2.putText(output_image,'curvature left: {0} m'.format(int(left_curverad)),(10,70), font, 2,(255,255,255),2)
+
+    x1_meters = left_fitx[-1]*xm_per_pix
+    x2_meters = right_fitx[-1]*xm_per_pix
+    my_x = (warped_binarized.shape[1]/2)*xm_per_pix
+    x_middle_meters = (x1_meters + x2_meters)/2
+    off_road_center = my_x - x_middle_meters
+    if  off_road_center > 0:
+        cv2.putText(output_image,'car is {0:.2f} m right of center'.format(off_road_center),(10,130), font, 1.6,(255,255,255),2)
+    else:
+        cv2.putText(output_image,'car is {0:.2f} m left of center'.format(-1*off_road_center),(10,130), font, 1.6,(255,255,255),2)
+```
 
 ####6. Provide an example image of your result plotted back down onto the road such that the lane area is identified clearly.
 
-
+Here is an example:
 
 ![alt text][image8]
 
@@ -138,5 +158,6 @@ Here's a [link to my video result](./result.mp4)
 
 ####1. Briefly discuss any problems / issues you faced in your implementation of this project.  Where will your pipeline likely fail?  What could you do to make it more robust?
 
-Here I'll talk about the approach I took, what techniques I used, what worked and why, where the pipeline might fail and how I might improve it if I were going to pursue this project further.  
+Trees!! The trees requires adaptive tuning parameters, it shows how the solution that I found is not very stable. Calculating sensitivity for changes in each of the params and a broader parameter change could help find a solution that is more robust but it requires a lot more computing (and studying time).
 
+In my computer, processing took about one second per frame, or 20 minutes for the whole video, a faster computer (or paralellization) would be really nice in a project like this. It is also not straightforward to me how to accelerate it in real world solutions short of creating code for an FPGA.
