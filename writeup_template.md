@@ -27,6 +27,7 @@ The goals / steps of this project are the following:
 [image7]: ./road-polifit.png "Fitted curves"
 [image8]: ./road-output.png "Output"
 [image9]: ./road-process.png "Complete process"
+[image10]: ./road-annotation.png "Curvature annotation"
 [video1]: ./result.mp4 "Video"
 
 ## [Rubric](https://review.udacity.com/#!/rubrics/571/view) Points
@@ -114,25 +115,9 @@ The section near cell #6 is called `Extrapolate lines and draw them on the scree
 
 The way to calculate the curvature radius and the vehicle position is to calculate a new x / y curve based on meters instead of pixels and with that get a radius using a formula based on the derivative of the curve. With the lane positions it is possible to average them and use that to calculate the position of the road based on the road width (average equaling zero means the car is centered).
 
-```
-    # Fit new polynomials to x,y in world space
-    left_fit_cr = np.polyfit(ploty*ym_per_pix, left_fitx*xm_per_pix, 2)
-    right_fit_cr = np.polyfit(ploty*ym_per_pix, right_fitx*xm_per_pix, 2)
-    left_curverad = ((1 + (2*left_fit_cr[0]*y_eval*ym_per_pix + left_fit_cr[1])**2)**1.5) / np.absolute(2*left_fit_cr[0])
-    right_curverad = ((1 + (2*right_fit_cr[0]*y_eval*ym_per_pix + right_fit_cr[1])**2)**1.5) / np.absolute(2*right_fit_cr[0])
+![alt text][image10]
 
-    cv2.putText(output_image,'curvature left: {0} m'.format(int(left_curverad)),(10,70), font, 2,(255,255,255),2)
-
-    x1_meters = left_fitx[-1]*xm_per_pix
-    x2_meters = right_fitx[-1]*xm_per_pix
-    my_x = (warped_binarized.shape[1]/2)*xm_per_pix
-    x_middle_meters = (x1_meters + x2_meters)/2
-    off_road_center = my_x - x_middle_meters
-    if  off_road_center > 0:
-        cv2.putText(output_image,'car is {0:.2f} m right of center'.format(off_road_center),(10,130), font, 1.6,(255,255,255),2)
-    else:
-        cv2.putText(output_image,'car is {0:.2f} m left of center'.format(-1*off_road_center),(10,130), font, 1.6,(255,255,255),2)
-```
+The code can be found in the draw_lane function (extract values) and the pipeline function (draw values).
 
 ####6. Provide an example image of your result plotted back down onto the road such that the lane area is identified clearly.
 
